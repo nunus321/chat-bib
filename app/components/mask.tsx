@@ -12,6 +12,7 @@ import DeleteIcon from "../icons/delete.svg";
 import EyeIcon from "../icons/eye.svg";
 import CopyIcon from "../icons/copy.svg";
 import DragIcon from "../icons/drag.svg";
+import ShareIcon from "../icons/share.svg";
 
 import { DEFAULT_MASK_AVATAR, Mask, useMaskStore } from "../store/mask";
 import {
@@ -64,6 +65,52 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
   return result;
+}
+
+// Build a SkoleTube "publish" link that embeds a portable SkoleGPT assistant link.
+// The assistant is recreated from its name + system prompt when the link is opened
+// (see jump-to-chat.tsx), so the share works on any device — unlike the local
+// "?mask=<id>" link, whose id only exists in the sharer's browser.
+//
+// Docs: https://www.skoletube.dk/media/publish/?method=embed&embed_code=...&title=...
+// Skoletube requires every variable to be url-encoded; URLSearchParams does this for
+// us, including the inner assistant link nested inside embed_code (double-encoding).
+// Build a link to `path` on this SkoleGPT host carrying the assistant's name +
+// system prompt as query params (e.g. /new-chat?name=Pirat&prompt=...). Opening such
+// a link recreates the assistant from those params (see jump-to-chat.tsx), so it
+// works on any device — unlike the local "?mask=<id>" link.
+function buildAssistantParamLink(mask: Mask, path: string): string {
+  const systemPrompt = mask.context?.[0]
+    ? getMessageTextContent(mask.context[0]).trim()
+    : "";
+  const url = new URL(path, location.origin);
+  url.searchParams.set("name", mask.name);
+  if (systemPrompt) url.searchParams.set("prompt", systemPrompt);
+  return url.toString();
+}
+
+export function buildSkoletubeShareLink(mask: Mask): string {
+  const systemPrompt = mask.context?.[0]
+    ? getMessageTextContent(mask.context[0]).trim()
+    : "";
+
+  // SkoleTube only accepts an embed code or a media-file URL as embed_code — a plain
+  // page URL makes its publish step hang — so we wrap our content in an iframe. The
+  // iframe shows a small launch page (Path.Skoletube) with a button that opens the
+  // real, full-page SkoleGPT in a new tab, instead of embedding the chat itself.
+  const launchLink = buildAssistantParamLink(mask, Path.Skoletube);
+  const embedCode = `<iframe src="${launchLink}" width="100%" height="400" frameborder="0"></iframe>`;
+
+  // Outer: the Skoletube publish page, pre-filled with this assistant's data.
+  const publishUrl = new URL("https://www.skoletube.dk/media/publish/");
+  publishUrl.searchParams.set("method", "embed");
+  publishUrl.searchParams.set("embed_code", embedCode);
+  publishUrl.searchParams.set("iframe", "true");
+  publishUrl.searchParams.set("title", mask.name);
+  if (systemPrompt) publishUrl.searchParams.set("description", systemPrompt);
+  publishUrl.searchParams.set("keyword", "skolegpt assistent");
+
+  return publishUrl.toString();
 }
 
 export function MaskAvatar(props: { avatar: string; model?: ModelType }) {
@@ -772,6 +819,19 @@ export function MaskPage() {
                   maskStore.create(editingMask);
                   setEditingMaskId(undefined);
                 }}
+              />,
+              <IconButton
+                key="share-skoletube"
+                icon={<ShareIcon />}
+                bordered
+                text={Locale.Mask.EditModal.ShareSkoletube}
+                onClick={() =>
+                  window.open(
+                    buildSkoletubeShareLink(editingMask),
+                    "_blank",
+                    "noopener,noreferrer",
+                  )
+                }
               />,
               <IconButton
                 key="close"

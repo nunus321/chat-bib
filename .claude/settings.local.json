@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp app/icons/skolegpt.svg app/icons/black-bot.svg)",
+      "Bash(cp app/icons/skolegpt.svg app/icons/bot.svg)",
+      "Bash(cp app/icons/skolegpt-transparent.png app/icons/bot.png)",
+      "Bash(cp public/skolegpt/skolegpt.png public/skolegpt/favicon.ico)"
+    ]
+  }
+}

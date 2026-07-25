@@ -657,15 +657,16 @@ const da = {
       Info: (count: number) => `${count} prompts`,
       Chat: "Chat",
       View: "Vis",
-      Edit: "Rediger",
+      Edit: "Indstillinger",
       Delete: "Slet",
       DeleteConfirm: "Vil du slette?",
     },
     EditModal: {
       Title: (readonly: boolean) =>
-        `Rediger assistent ${readonly ? "(skrivebeskyttet)" : ""}`,
+        `Indstillinger ${readonly ? "(skrivebeskyttet)" : ""}`,
       Download: "Download",
       Clone: "Opret kopi",
+      ShareSkoletube: "Del på SkoleTube",
     },
     Config: {
       Avatar: "Assistent ikon",
