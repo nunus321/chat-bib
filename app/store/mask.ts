@@ -14,6 +14,7 @@ export type Mask = {
   avatar: string;
   name: string;
   hideContext?: boolean;
+  hideSystemPrompt?: boolean;
   context: ChatMessage[];
   syncGlobalConfig?: boolean;
   modelConfig: ModelConfig;
@@ -22,6 +23,18 @@ export type Mask = {
   availableModels?: MODEL_NAMES[];
   plugin?: unknown[];
 };
+
+// Owned/session masks carry `hideSystemPrompt` directly (it's saved on the
+// object itself). Builtin masks are read-only templates and can't be saved
+// to, so their hidden state instead lives in the app config's
+// `hiddenSystemPromptMaskIds`, keyed by mask id.
+export function isSystemPromptHidden(
+  mask: Pick<Mask, "id" | "builtin" | "hideSystemPrompt">,
+  hiddenBuiltinMaskIds: string[],
+): boolean {
+  if (mask.hideSystemPrompt) return true;
+  return mask.builtin && hiddenBuiltinMaskIds.includes(mask.id);
+}
 
 export const DEFAULT_MASK_STATE = {
   masks: {} as Record<string, Mask>,

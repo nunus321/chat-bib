@@ -64,6 +64,25 @@
 
   .system-prompt-preview {
     margin-bottom: 10px;
+
+    .system-prompt-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .system-prompt-lock {
+        display: flex;
+        align-items: center;
+        opacity: 0.6;
+        cursor: default;
+
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+
     textarea {
       width: 95%;
       min-width: 95%;

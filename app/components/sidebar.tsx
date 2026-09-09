@@ -12,10 +12,12 @@ import DeleteIcon from "../icons/delete.svg";
 import MaskIcon from "../icons/mask.svg";
 import PluginIcon from "../icons/plugin.svg";
 import DragIcon from "../icons/drag.svg";
+import LockIcon from "../icons/lock.svg";
 
 import Locale from "../locales";
 
 import { useAppConfig, useChatStore } from "../store";
+import { isSystemPromptHidden } from "../store/mask";
 
 import {
   DEFAULT_SIDEBAR_WIDTH,
@@ -149,6 +151,9 @@ export function SideBar(props: { className?: string }) {
     ? currentChat?.mask?.context?.[0]?.content
     : undefined;
   const editableSystemPrompt = !currentChat?.mask?.builtin;
+  const systemPromptHidden = currentChat?.mask
+    ? isSystemPromptHidden(currentChat.mask, config.hiddenSystemPromptMaskIds ?? [])
+    : false;
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     chatStore.updateCurrentSession((session) => {
       session.mask.context[0].content = e.target.value;
@@ -188,7 +193,15 @@ export function SideBar(props: { className?: string }) {
         !shouldNarrow && (
           <div className={styles["system-prompt-preview"]}>
             <div className={styles["system-prompt-label"]}>
-              Systemprompt
+              <span>Systemprompt</span>
+              {systemPromptHidden && (
+                <span
+                  className={styles["system-prompt-lock"]}
+                  title="Systemprompten er skjult"
+                >
+                  <LockIcon />
+                </span>
+              )}
               {!editableSystemPrompt && (
                 <div
                   style={{
@@ -204,13 +217,15 @@ export function SideBar(props: { className?: string }) {
               )}
             </div>
 
-            <textarea
-              style={{ opacity: editableSystemPrompt ? 1 : 0.7 }}
-              disabled={!editableSystemPrompt}
-              value={currentSystemPrompt as string}
-              onChange={handlePromptChange}
-              className={styles["system-prompt-textarea"]}
-            />
+            {!systemPromptHidden && (
+              <textarea
+                style={{ opacity: editableSystemPrompt ? 1 : 0.7 }}
+                disabled={!editableSystemPrompt}
+                value={currentSystemPrompt as string}
+                onChange={handlePromptChange}
+                className={styles["system-prompt-textarea"]}
+              />
+            )}
           </div>
         )
       ) : (

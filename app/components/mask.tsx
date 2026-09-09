@@ -10,12 +10,18 @@ import AddIcon from "../icons/add.svg";
 import CloseIcon from "../icons/close.svg";
 import DeleteIcon from "../icons/delete.svg";
 import EyeIcon from "../icons/eye.svg";
+import EyeOffIcon from "../icons/eye-off.svg";
 import CopyIcon from "../icons/copy.svg";
 import DragIcon from "../icons/drag.svg";
 import ShareIcon from "../icons/share.svg";
 import QrIcon from "../icons/qr.svg";
 
-import { DEFAULT_MASK_AVATAR, Mask, useMaskStore } from "../store/mask";
+import {
+  DEFAULT_MASK_AVATAR,
+  isSystemPromptHidden,
+  Mask,
+  useMaskStore,
+} from "../store/mask";
 import {
   ChatMessage,
   createMessage,
@@ -140,32 +146,84 @@ export function MaskConfig(props: {
 
   const [showSimpleSettings, setShowSimpleSettings] = useState(true);
   if (showSimpleSettings) {
+    // readonly (builtin) masks can't be saved to directly, so their hidden
+    // state is tracked separately in the app config by mask id instead.
+    const hiddenBuiltinMaskIds = globalConfig.hiddenSystemPromptMaskIds ?? [];
+    const systemPromptHidden = isSystemPromptHidden(
+      props.mask,
+      hiddenBuiltinMaskIds,
+    );
+
+    const toggleSystemPromptHidden = () => {
+      if (props.readonly) {
+        globalConfig.update((c) => {
+          const ids = new Set(c.hiddenSystemPromptMaskIds ?? []);
+          if (ids.has(props.mask.id)) {
+            ids.delete(props.mask.id);
+          } else {
+            ids.add(props.mask.id);
+          }
+          c.hiddenSystemPromptMaskIds = Array.from(ids);
+        });
+      } else {
+        props.updateMask((mask) => {
+          mask.hideSystemPrompt = !mask.hideSystemPrompt;
+        });
+      }
+    };
+
     return (
       <>
         <div style={{ fontSize: 14, marginBottom: 8 }}>Systemprompt:</div>
         <div
           className={chatStyle["context-prompt"]}
-          style={{ marginBottom: 20 }}
+          style={{ marginBottom: 4 }}
         >
           <div className={chatStyle["context-prompt-row"]}>
-            <Input
-              value={(props.mask.context?.[0]?.content as string) || ""}
-              type="text"
-              className={chatStyle["context-content"]}
-              rows={5}
-              onInput={(e) =>
-                props.updateMask((mask) => {
-                  mask.context = [
-                    {
-                      ...(mask.context[0] || {}),
-                      role: MessageRole.System,
-                      content: e.currentTarget.value,
-                    },
-                  ];
-                })
-              }
-            />
+            <div style={{ position: "relative", flex: 1, maxWidth: "100%" }}>
+              <Input
+                value={(props.mask.context?.[0]?.content as string) || ""}
+                type="text"
+                className={chatStyle["context-content"]}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  paddingRight: 32,
+                  ...(systemPromptHidden ? { color: "#d0d0d0" } : {}),
+                }}
+                rows={5}
+                onInput={(e) =>
+                  props.updateMask((mask) => {
+                    mask.context = [
+                      {
+                        ...(mask.context[0] || {}),
+                        role: MessageRole.System,
+                        content: e.currentTarget.value,
+                      },
+                    ];
+                  })
+                }
+              />
+              <IconButton
+                icon={systemPromptHidden ? <EyeOffIcon /> : <EyeIcon />}
+                onClick={toggleSystemPromptHidden}
+                size={1}
+                title={systemPromptHidden ? "Vis systemprompt" : "Skjul systemprompt"}
+                className={styles["system-prompt-eye"]}
+              />
+            </div>
           </div>
+        </div>
+        <div
+          style={{
+            fontSize: 12,
+            color: "gray",
+            marginBottom: 20,
+          }}
+        >
+          {systemPromptHidden
+            ? "Systemprompten er skjult og vises ikke, når chatten åbnes."
+            : "Skjul systemprompten, så den ikke vises, når chatten åbnes."}
         </div>
         <List>
           <ListItem title="Vis avancerede indstillinger">
