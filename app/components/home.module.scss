@@ -66,9 +66,11 @@
     margin-bottom: 10px;
 
     .system-prompt-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      .system-prompt-label-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
 
       .system-prompt-lock {
         display: flex;

@@ -193,15 +193,17 @@ export function SideBar(props: { className?: string }) {
         !shouldNarrow && (
           <div className={styles["system-prompt-preview"]}>
             <div className={styles["system-prompt-label"]}>
-              <span>Systemprompt</span>
-              {systemPromptHidden && (
-                <span
-                  className={styles["system-prompt-lock"]}
-                  title="Systemprompten er skjult"
-                >
-                  <LockIcon />
-                </span>
-              )}
+              <div className={styles["system-prompt-label-row"]}>
+                <span>Systemprompt</span>
+                {systemPromptHidden && (
+                  <span
+                    className={styles["system-prompt-lock"]}
+                    title="Systemprompten er skjult"
+                  >
+                    <LockIcon />
+                  </span>
+                )}
+              </div>
               {!editableSystemPrompt && (
                 <div
                   style={{
