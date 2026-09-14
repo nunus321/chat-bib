@@ -19,6 +19,7 @@ export function JumpToChat() {
     const params = new URLSearchParams(location.search);
     const name = params.get("name")?.trim() || undefined;
     const prompt = params.get("prompt")?.trim() || undefined;
+    const hideSystemPrompt = params.get("hidePrompt") === "1";
 
     const builtinMasks = Object.values(BUILTIN_MASK_STORE.masks) as Mask[];
     const allMasks: Mask[] = [...maskStore.getAll(), ...builtinMasks];
@@ -47,6 +48,7 @@ export function JumpToChat() {
             context: [
               createMessage({ role: MessageRole.System, content: prompt }),
             ],
+            hideSystemPrompt,
           })
         : matchedMask;
 
