@@ -77,23 +77,35 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
 
 // Build an app link with the assistant name and optional system prompt.
 // URLSearchParams does the URL encoding.
-function buildAssistantParamLink(mask: Mask, path: string): string {
+function buildAssistantParamLink(
+  mask: Mask,
+  path: string,
+  hideSystemPrompt: boolean,
+): string {
   const systemPrompt = mask.context?.[0]
     ? getMessageTextContent(mask.context[0]).trim()
     : "";
   const url = new URL(path, location.origin);
   url.searchParams.set("name", mask.name);
   if (systemPrompt) url.searchParams.set("prompt", systemPrompt);
+  if (hideSystemPrompt) url.searchParams.set("h", "1");
   return url.toString();
 }
 
-export function buildSkoletubeShareLink(mask: Mask): string {
+export function buildSkoletubeShareLink(
+  mask: Mask,
+  hideSystemPrompt: boolean,
+): string {
   const systemPrompt = mask.context?.[0]
     ? getMessageTextContent(mask.context[0]).trim()
     : "";
 
   // SkoleTube needs embed_code, so we wrap the launch page in an iframe.
-  const launchLink = buildAssistantParamLink(mask, Path.Skoletube);
+  const launchLink = buildAssistantParamLink(
+    mask,
+    Path.Skoletube,
+    hideSystemPrompt,
+  );
   const embedCode = `<iframe src="${launchLink}" width="100%" height="400" frameborder="0"></iframe>`;
 
   // Open SkoleTube's publish page with this assistant prefilled.
@@ -207,7 +219,7 @@ export function MaskConfig(props: {
               <IconButton
                 icon={systemPromptHidden ? <EyeOffIcon /> : <EyeIcon />}
                 onClick={toggleSystemPromptHidden}
-                size={1}
+                size={3}
                 title={systemPromptHidden ? "Vis systemprompt" : "Skjul systemprompt"}
                 className={styles["system-prompt-eye"]}
               />
@@ -621,7 +633,16 @@ export function ContextPrompts(props: {
 // link, and a QR code of that same link. Uses the existing link builders.
 function ShareMenu(props: { mask: Mask }) {
   const [showQr, setShowQr] = useState(false);
-  const shareLink = buildAssistantParamLink(props.mask, Path.NewChat);
+  const globalConfig = useAppConfig();
+  const systemPromptHidden = isSystemPromptHidden(
+    props.mask,
+    globalConfig.hiddenSystemPromptMaskIds ?? [],
+  );
+  const shareLink = buildAssistantParamLink(
+    props.mask,
+    Path.NewChat,
+    systemPromptHidden,
+  );
 
   return (
     <div className={styles["share-menu"]}>
@@ -632,7 +653,7 @@ function ShareMenu(props: { mask: Mask }) {
         className={`${styles["share-menu-item"]} clickable`}
         onClick={() =>
           window.open(
-            buildSkoletubeShareLink(props.mask),
+            buildSkoletubeShareLink(props.mask, systemPromptHidden),
             "_blank",
             "noopener,noreferrer",
           )
