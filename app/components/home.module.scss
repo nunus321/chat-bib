@@ -154,15 +154,14 @@
   position: relative;
   padding-top: 20px;
   padding-bottom: 20px;
-
   display: flex;
-  justify-content: end;
+  justify-content: flex-start;
 }
 
 .sidebar-logo {
   position: absolute;
   left: 0;
-  bottom: 18px;
+  bottom: 5px;
 }
 
 .sidebar-title {
@@ -360,9 +359,12 @@
 }
 
 .sidebar .newChatButton {
-  background-color: var(--primary);
+  background-color: var(--bar-color);
   width: 300px;
-  color: white;
+  color: var(--gray);
+  &:hover {
+    background-color: rgb(24, 24, 22); // Sort-900 vid hover
+  }
 }
 
 .sidebar-disclaimer {

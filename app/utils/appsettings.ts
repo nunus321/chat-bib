@@ -34,7 +34,7 @@ const skolegpt: RuntimeEnv = {
     "SkoleGPT kan tage fejl. Tjek altid vigtige oplysninger og råd med en pålidelig kilde.",
   APP_TITLE: "SkoleGPT",
   APP_TAGLINE: "",
-  APP_LOGO: "skolegpt/skolegpt-gray.svg",
+  APP_LOGO: "skolegpt/skolegpt-white.svg",
   CONTAINER_CSS_CLASS: "skolegpt",
   DISABLE_GOOGLE_FONTS: true,
   HOMEPAGE_IS_MASKLIST: true,
