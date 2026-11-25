@@ -56,6 +56,15 @@ if (mode !== "export") {
   nextConfig.headers = async () => {
     return [
       {
+        source: "/tokenizers/gemma-4-4d7ae498/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/api/:path*",
         headers: CorsHeaders,
       },
